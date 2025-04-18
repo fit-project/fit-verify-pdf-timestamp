@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "fit_verify_pdf_timestamp"
+version = "1.0.1"
+description = "FIT Verify PDF Timestamp Module"
+authors = ["FIT Project"]
+license = "LGPL-3.0-or-later"
+packages = [
+    { include = "fit_verify_pdf_timestamp" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+PySide6 = "6.9.0"
+
+fit-common = {git = "https://github.com/fit-project/fit-common.git", rev = "main"}
+fit-assets = {git = "https://github.com/fit-project/fit-assets.git", rev = "main"}
+fit-configurations = {git = "https://github.com/fit-project/fit-configurations.git", rev = "main"}
+fit-cases = {git = "https://github.com/fit-project/fit-cases.git", rev = "main"}
+rfc3161ng = "^2.1.3"
+
+
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
