@@ -3,12 +3,15 @@
 ######
 # -----
 # Copyright (c) 2023 FIT-Project
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: LGPL-3.0-or-later
 # -----
 ######
 
 
 from PySide6 import QtCore, QtGui, QtWidgets
+
+from fit_verify_pdf_timestamp.lang import load_translations
+from fit_common.core.utils import get_version
 
 
 class Ui_fit_verify_pdf_timestamp(object):
@@ -873,30 +876,12 @@ class Ui_fit_verify_pdf_timestamp(object):
         QtCore.QMetaObject.connectSlotsByName(fit_verify_pdf_timestamp)
 
     def retranslateUi(self, fit_verify_pdf_timestamp):
-        _translate = QtCore.QCoreApplication.translate
-        fit_verify_pdf_timestamp.setWindowTitle(
-            _translate("fit_verify_pdf_timestamp", "FIT Verify PDF Timestamp")
-        )
-        self.title_right_info.setText(
-            _translate(
-                "fit_verify_pdf_timestamp", "Verify Acquisiton Report PDF Timestamp"
-            )
-        )
-        self.pdf_file_input.setPlaceholderText(
-            _translate(
-                "fit_verify_pdf_timestamp", "Select PDF file (acquisition_report.pdf)"
-            )
-        )
-        self.tsr_file_input.setPlaceholderText(
-            _translate("fit_verify_pdf_timestamp", "Select TSR file (timestamp.tsr)")
-        )
-        self.crt_file_input.setPlaceholderText(
-            _translate("fit_verify_pdf_timestamp", "Select CRT file (tsa.crt)")
-        )
-        self.verification_button.setText(
-            _translate("fit_verify_pdf_timestamp", "Verify")
-        )
-        self.credits_label.setText(
-            _translate("fit_verify_pdf_timestamp", "By: fit-project.org")
-        )
-        self.version.setText(_translate("fit_verify_pdf_timestamp", "v1.0.3"))
+        fit_verify_pdf_timestamp.setWindowTitle("FIT Verify PDF Timestamp")
+        self.translations = load_translations()
+        self.title_right_info.setText(self.translations["TITLE_RIGHT_INFO"])
+        self.pdf_file_input.setPlaceholderText(self.translations["PDF_FILE_INPUT"])
+        self.tsr_file_input.setPlaceholderText(self.translations["TSR_FILE_INPUT"])
+        self.crt_file_input.setPlaceholderText(self.translations["CRT_FILE_INPUT"])
+        self.verification_button.setText(self.translations["VERIFICATION_BUTTON"])
+        self.credits_label.setText("By: fit-project.org")
+        self.version.setText(get_version())

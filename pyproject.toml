@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fit_verify_pdf_timestamp"
-version = "1.0.1"
+version = "1.0.0"
 description = "FIT Verify PDF Timestamp Module"
 authors = ["FIT Project"]
 license = "LGPL-3.0-or-later"

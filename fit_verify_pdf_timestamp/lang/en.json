@@ -1,4 +1,9 @@
 {
+    "TITLE_RIGHT_INFO" : "Verify Acquisiton Report PDF Timestamp",
+    "PDF_FILE_INPUT" : "Select PDF file (acquisition_report.pdf)",
+    "TSR_FILE_INPUT" : "Select TSR file (timestamp.tsr)",
+    "CRT_FILE_INPUT" : "Select CRT file (tsa.crt)",
+    "VERIFICATION_BUTTON" : "Verify",
     "VERIFICATION_COMPLETED": "Verification completed",
     "VERIFICATION_SUCCESS": "Timestamp has been verified successfully.",
     "VERIFICATION_FAIL": "Timestamp verification failed.",

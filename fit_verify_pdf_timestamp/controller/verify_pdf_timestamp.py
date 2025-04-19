@@ -3,7 +3,7 @@
 ######
 # -----
 # Copyright (c) 2023 FIT-Project
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: LGPL-3.0-or-later
 # -----
 ######
 
