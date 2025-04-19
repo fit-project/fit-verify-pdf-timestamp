@@ -6,19 +6,23 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # -----
 ######
+
 import base64
 import os
 
-from string import Template
+from jinja2 import Template
 
 from xhtml2pdf import pisa
 from PyPDF2 import PdfMerger
 
-from controller.configurations.tabs.general.typesproceedings import (
+
+from fit_configurations.controller.tabs.general.typesproceedings import (
     TypesProceedings as TypesProceedingsController,
 )
 
-from common.utility import get_logo, get_version, get_language, resolve_path
+from fit_common.core.utils import get_logo, get_version, resolve_path
+from fit_configurations.utils import get_language
+from fit_verify_pdf_timestamp.lang import load_translations
 
 
 class VerifyPDFTimestamp:
@@ -33,24 +37,24 @@ class VerifyPDFTimestamp:
 
         language = get_language()
         if language == "Italian":
-            import common.constants.controller.report as REPORT
+            self.translations = load_translations(lang="it")
         else:
-            import common.constants.controller.report_eng as REPORT
-        self.REPORT = REPORT
+            self.translations = load_translations()
 
     def generate_pdf(self, result, info_file_path):
         # PREPARING DATA TO FILL THE PDF
         with open(info_file_path, "r") as f:
             info_file = f.read()
         # FILLING FRONT PAGE WITH DATA
-        with open(os.path.join(resolve_path("assets/templates"), "front.html")) as fh:
+        from importlib.resources import files
+        template = Template((files("fit_assets.templates") / "front.html").read_text(encoding="utf-8"))
             template = Template(fh.read())
 
-        front_index = template.safe_substitute(
+        front_index = template.render(
             img=get_logo(),
-            t1=self.REPORT.T1,
-            title=self.REPORT.TITLE,
-            report=self.REPORT.REPORT,
+            t1=self.translations["T1"],
+            title=self.translations["TITLE"],
+            report=self.translations["REPORT"],
             version=get_version(),
         )
 
@@ -73,33 +77,31 @@ class VerifyPDFTimestamp:
             logo = "<div></div>"
 
         if result:
-            t3descr = self.REPORT.VERIFI_OK
+            t3descr = self.translations["VERIFI_OK"]
         else:
-            t3descr = self.REPORT.VERIFI_KO
+            t3descr = self.translations["VERIFI_KO"]
 
-        with open(
-            resolve_path(os.path.join("assets/templates", "template_verification.html"))
-        ) as fh:
+                template = Template((files("fit_assets.templates") / "template_verification.html").read_text(encoding="utf-8"))
             template = Template(fh.read())
 
-        content_index = template.safe_substitute(
-            title=self.REPORT.TITLE,
-            index=self.REPORT.INDEX,
-            description=self.REPORT.DESCRIPTION,
-            t1=self.REPORT.T1,
-            t2=self.REPORT.T2,
-            case=self.REPORT.CASEINFO,
-            casedata=self.REPORT.CASEDATA,
-            case0=self.REPORT.CASE,
-            case1=self.REPORT.LAWYER,
-            case2=self.REPORT.OPERATOR,
-            case3=self.REPORT.PROCEEDING,
-            case4=self.REPORT.COURT,
-            case5=self.REPORT.NUMBER,
-            case6=self.REPORT.ACQUISITION_TYPE,
-            case7=self.REPORT.ACQUISITION_DATE,
-            case8=self.REPORT.NOTES,
-            t3=self.REPORT.VERIFICATION,
+        content_index = template.render(
+            title=self.translations["TITLE"],
+            index=self.translations["INDEX"],
+            description=self.translations["DESCRIPTION"],
+            t1=self.translations["T1"],
+            t2=self.translations["T2"],
+            case=self.translations["CASEINFO"],
+            casedata=self.translations["CASEDATA"],
+            case0=self.translations["CASE"],
+            case1=self.translations["LAWYER"],
+            case2=self.translations["OPERATOR"],
+            case3=self.translations["PROCEEDING"],
+            case4=self.translations["COURT"],
+            case5=self.translations["NUMBER"],
+            case6=self.translations["ACQUISITION_TYPE"],
+            case7=self.translations["ACQUISITION_DATE"],
+            case8=self.translations["NOTES"],
+            t3=self.translations["VERIFICATION"],
             t3descr=t3descr,
             info_file=info_file,
             data0=str(self.case_info["name"] or "N/A"),
@@ -108,11 +110,11 @@ class VerifyPDFTimestamp:
             data3=proceeding_type,
             data4=str(self.case_info["courthouse"] or "N/A"),
             data5=str(self.case_info["proceeding_number"] or "N/A"),
-            data6=self.REPORT.VERIFICATION,
+            data6=self.translations["VERIFICATION"],
             data7=self.ntp,
             data8=str(self.case_info["notes"] or "N/A").replace("\n", "<br>"),
-            page=self.REPORT.PAGE,
-            of=self.REPORT.OF,
+            page=self.translations["PAGE"],
+            of=self.translations["OF"],
             logo=logo,
         )
 

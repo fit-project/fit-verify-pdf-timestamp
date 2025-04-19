@@ -18,9 +18,9 @@ from PySide6.QtWidgets import QFileDialog
 
 from fit_cases.view.case_form_dialog import CaseFormDialog
 from fit_common.gui.utils import show_finish_verification_dialog, get_verification_label_text, add_label_in_verification_status_list, VerificationTypes, Status
-from fit_common.core.utils import get_ntp_date_and_time, resolve_path, get_version
+from fit_common.core.utils import get_ntp_date_and_time, get_version
 
-from controller.verify_pdf_timestamp import (
+from fit_verify_pdf_timestamp.controller.verify_pdf_timestamp import (
     VerifyPDFTimestamp as VerifyPDFTimestampController,
 )
 
@@ -30,6 +30,10 @@ from fit_configurations.controller.tabs.general.general import (
 from fit_configurations.controller.tabs.network.networkcheck import NetworkControllerCheck
 from fit_configurations.controller.tabs.timestamp.timestamp import (
     Timestamp as TimestampConfigurationController,
+)
+
+from fit_verify_pdf_timestamp.view.verify_pdf_timestamp_ui import (
+    Ui_fit_verify_pdf_timestamp,
 )
 
 from fit_verify_pdf_timestamp.lang import load_translations
@@ -48,47 +52,47 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
         self.__init_ui()
 
     def __init_ui(self):
-        uic.loadUi(
-            resolve_path("ui/verify_pdf_timestamp/verify_pdf_timestamp.ui"), self
-        )
 
         # HIDE STANDARD TITLE BAR
         self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
 
+        self.ui = Ui_fit_verify_pdf_timestamp()
+        self.ui.setupUi(self)
+
         # CUSTOM TOP BAR
-        self.left_box.mouseMoveEvent = self.move_window
+        self.ui.left_box.mouseMoveEvent = self.move_window
 
         # MINIMIZE BUTTON
-        self.minimize_button.clicked.connect(self.showMinimized)
+        self.ui.minimize_button.clicked.connect(self.showMinimized)
 
         # CLOSE BUTTON
-        self.close_button.clicked.connect(self.close)
+        self.ui.close_button.clicked.connect(self.close)
 
         # SET VERSION
-        self.version.setText(get_version())
+        self.ui.version.setText(get_version())
 
         # PDF FILE BUTTON
-        self.pdf_file_button.clicked.connect(
+        self.ui.pdf_file_button.clicked.connect(
             lambda extension: self.__select_file("pdf")
         )
 
         # PDF TSR BUTTON
-        self.tsr_file_button.clicked.connect(
+        self.ui.tsr_file_button.clicked.connect(
             lambda extension: self.__select_file("tsr")
         )
 
         # PDF CRT BUTTON
-        self.crt_file_button.clicked.connect(
+        self.ui.crt_file_button.clicked.connect(
             lambda extension: self.__select_file("crt")
         )
 
         # VERIFICATION BUTTON
-        self.verification_button.clicked.connect(self.__verify)
-        self.verification_button.setEnabled(False)
+        self.ui.verification_button.clicked.connect(self.__verify)
+        self.ui.verification_button.setEnabled(False)
 
         # DISABLE VERIFY BUTTON IF FIELDs IS EMPTY
-        self.input_fields = self.wrapper.findChildren(QtWidgets.QLineEdit)
+        self.input_fields = self.ui.wrapper.findChildren(QtWidgets.QLineEdit)
         for input_field in self.input_fields:
             input_field.textChanged.connect(self.__enable_verify_button)
 
@@ -103,7 +107,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
 
     def __enable_verify_button(self):
         all_fields_filled = all(input_field.text() for input_field in self.input_fields)
-        self.verification_button.setEnabled(all_fields_filled)
+        self.ui.verification_button.setEnabled(all_fields_filled)
 
     def __select_file(self, extension):
         # open the correct file picker based on extension
@@ -117,7 +121,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
                 self.translations["PDF_FILE"],
             )
             if check:
-                self.pdf_file_input.setText(file)
+                self.ui.pdf_file_input.setText(file)
                 if self.acquisition_directory is None:
                     self.acquisition_directory = os.path.dirname(file)
         elif extension == "tsr":
@@ -128,7 +132,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
                 self.translations["TSR_FILE"],
             )
             if check:
-                self.tsr_file_input.setText(file)
+                self.ui.tsr_file_input.setText(file)
                 if self.acquisition_directory is None:
                     self.acquisition_directory = os.path.dirname(file)
 
@@ -140,15 +144,15 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
                 self.translations["CRT_FILE"],
             )
             if check:
-                self.crt_file_input.setText(file)
+                self.ui.crt_file_input.setText(file)
                 if self.acquisition_directory is None:
                     self.acquisition_directory = os.path.dirname(file)
 
     def __verify(self):
-        self.verification_status_list.clear()
+        self.ui.verification_status_list.clear()
 
-        certificate = open(self.crt_file_input.text(), "rb").read()
-        pdf_file = self.pdf_file_input.text()
+        certificate = open(self.ui.crt_file_input.text(), "rb").read()
+        pdf_file = self.ui.pdf_file_input.text()
         timestamp = open(self.tsr_file_input.text(), "rb").read()
         server_name = TimestampConfigurationController().options.get("server_name")
 
@@ -179,16 +183,16 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
                         self.translations["GENERATE_FILE_TIMESTAMP_INFO_FAIL"]
                     )
                     add_label_in_verification_status_list(
-                        self.verification_status_list, label
+                        self.ui.verification_status_list, label
                     )
             else:
                 label = "INFO: {}".format(self.translations["VERIFY_TIMESTAMP_FAIL"])
                 add_label_in_verification_status_list(
-                    self.verification_status_list, label
+                    self.ui.verification_status_list, label
                 )
         else:
             label = "INFO: {}".format(self.translations["CHECK_TIMESTAMP_SERVER_FAIL"])
-            add_label_in_verification_status_list(self.verification_status_list, label)
+            add_label_in_verification_status_list(self.ui.verification_status_list, label)
 
     def __check_remote_timestamper(self, certificate, server_name):
 
@@ -211,7 +215,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
             verification_name, verification_status, verification_message
         )
 
-        add_label_in_verification_status_list(self.verification_status_list, label)
+        add_label_in_verification_status_list(self.ui.verification_status_list, label)
 
         return verification_status, remote_timestamper
 
@@ -233,7 +237,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
             verification_name, verification_status, verification_message
         )
 
-        add_label_in_verification_status_list(self.verification_status_list, label)
+        add_label_in_verification_status_list(self.ui.verification_status_list, label)
 
         return verification_status, verified
 
@@ -270,12 +274,12 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
                     "======================================================================\n"
                 )
                 file.write(f"{self.translations["REPORT_LABEL_FILENAME"]}\n")
-                file.write(f"{os.path.basename(self.pdf_file_input.text())}\n")
+                file.write(f"{os.path.basename(self.ui.pdf_file_input.text())}\n")
                 file.write(
                     "======================================================================\n"
                 )
                 file.write(f"{self.translations["REPORT_LABEL_SIZE"]}\n")
-                file.write(f"{os.path.getsize(self.pdf_file_input.text())} bytes\n")
+                file.write(f"{os.path.getsize(self.ui.pdf_file_input.text())} bytes\n")
                 file.write(
                     "======================================================================\n"
                 )
@@ -307,7 +311,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
             verification_name, verification_status, verification_message
         )
 
-        add_label_in_verification_status_list(self.verification_status_list, label)
+        add_label_in_verification_status_list(self.ui.verification_status_list, label)
 
         return verification_status, info_file_path
 
@@ -334,7 +338,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
             verification_name, verification_status, verification_message
         )
 
-        add_label_in_verification_status_list(self.verification_status_list, label)
+        add_label_in_verification_status_list(self.ui.verification_status_list, label)
 
         return verification_status
 
