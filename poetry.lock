@@ -398,7 +398,7 @@ PySide6 = "6.9.0"
 type = "git"
 url = "https://github.com/fit-project/fit-assets.git"
 reference = "main"
-resolved_reference = "f7469394548a961c839224e832339910e991b750"
+resolved_reference = "c69bada5554a55e6414a66f1a9e4891d6b861f48"
 
 [[package]]
 name = "fit-cases"
@@ -426,7 +426,7 @@ resolved_reference = "ee689b53e2838966425b33293cb9a78bf125974d"
 
 [[package]]
 name = "fit-common"
-version = "0.1.0"
+version = "0.1.1"
 description = "Shared code between modules of the FIT project"
 optional = false
 python-versions = ">=3.9,<3.13"
@@ -447,11 +447,11 @@ windows-tools = {version = "^2.5.0", markers = "sys_platform == \"win32\""}
 type = "git"
 url = "https://github.com/fit-project/fit-common.git"
 reference = "main"
-resolved_reference = "ec17a4d9c860b7dab230f47a68e5624951e90932"
+resolved_reference = "f19d341e0eb8db3bfa42d2c944e4e3af6ed81449"
 
 [[package]]
 name = "fit-configurations"
-version = "1.0.2"
+version = "1.0.3"
 description = "This module provides the graphical interface for configuring settings used by the FIT application."
 optional = false
 python-versions = ">=3.9,<3.13"
@@ -469,7 +469,7 @@ sqlalchemy = "^2.0.40"
 type = "git"
 url = "https://github.com/fit-project/fit-configurations.git"
 reference = "main"
-resolved_reference = "639e5fbf41a0e98695e54f2c34fda223174188ed"
+resolved_reference = "3580e50232308b22398ec41118d9860cad77f693"
 
 [[package]]
 name = "greenlet"

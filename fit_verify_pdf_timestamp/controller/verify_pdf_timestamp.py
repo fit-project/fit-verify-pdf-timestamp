@@ -11,6 +11,7 @@ import base64
 import os
 
 from jinja2 import Template
+from importlib.resources import files
 
 from xhtml2pdf import pisa
 from PyPDF2 import PdfMerger
@@ -20,7 +21,7 @@ from fit_configurations.controller.tabs.general.typesproceedings import (
     TypesProceedings as TypesProceedingsController,
 )
 
-from fit_common.core.utils import get_logo, get_version, resolve_path
+from fit_common.core.utils import get_version
 from fit_configurations.utils import get_language
 from fit_verify_pdf_timestamp.lang import load_translations
 
@@ -36,6 +37,7 @@ class VerifyPDFTimestamp:
         self.ntp = ntp
 
         language = get_language()
+
         if language == "Italian":
             self.translations = load_translations(lang="it")
         else:
@@ -45,13 +47,18 @@ class VerifyPDFTimestamp:
         # PREPARING DATA TO FILL THE PDF
         with open(info_file_path, "r") as f:
             info_file = f.read()
+
         # FILLING FRONT PAGE WITH DATA
-        from importlib.resources import files
-        template = Template((files("fit_assets.templates") / "front.html").read_text(encoding="utf-8"))
-            template = Template(fh.read())
+        template = Template(
+            (files("fit_assets.templates") / "front.html").read_text(encoding="utf-8")
+        )
+
+        logo_path = files("fit_assets.images") / "logo-640x640.png"
+        logo_bytes = logo_path.read_bytes()
+        logo_base64 = base64.b64encode(logo_bytes).decode("utf-8")
 
         front_index = template.render(
-            img=get_logo(),
+            img=f"data:image/png;base64,{logo_base64}",
             t1=self.translations["T1"],
             title=self.translations["TITLE"],
             report=self.translations["REPORT"],
@@ -76,14 +83,15 @@ class VerifyPDFTimestamp:
         else:
             logo = "<div></div>"
 
-        if result:
-            t3descr = self.translations["VERIFI_OK"]
-        else:
-            t3descr = self.translations["VERIFI_KO"]
+        t3descr = (
+            self.translations["VERIFI_OK"] if result else self.translations["VERIFI_KO"]
+        )
 
-                template = Template((files("fit_assets.templates") / "template_verification.html").read_text(encoding="utf-8"))
-            template = Template(fh.read())
-
+        template = Template(
+            (files("fit_assets.templates") / "template_verification.html").read_text(
+                encoding="utf-8"
+            )
+        )
         content_index = template.render(
             title=self.translations["TITLE"],
             index=self.translations["INDEX"],
@@ -118,7 +126,7 @@ class VerifyPDFTimestamp:
             logo=logo,
         )
 
-        # create pdf front and content, merge them and remove merged files
+        # Create PDF front and content, merge them and remove merged files
         pisa.CreatePDF(front_index, dest=self.output_front_result)
         pisa.CreatePDF(content_index, dest=self.output_content_result)
         merger = PdfMerger()
