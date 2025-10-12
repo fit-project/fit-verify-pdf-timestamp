@@ -24,20 +24,22 @@ from fit_common.gui.utils import (
     VerificationTypes,
     Status,
 )
-from fit_common.core.utils import get_ntp_date_and_time, get_version
+from fit_common.core import get_version
+
+from fit_common.core.utils import get_ntp_date_and_time
 
 from fit_verify_pdf_timestamp.controller.verify_pdf_timestamp import (
     VerifyPDFTimestamp as VerifyPDFTimestampController,
 )
 
 from fit_configurations.controller.tabs.general.general import (
-    General as GeneralConfigurationController,
+    GeneralController as GeneralConfigurationController,
 )
-from fit_configurations.controller.tabs.network.networkcheck import (
-    NetworkControllerCheck,
+from fit_configurations.controller.tabs.network.network_check import (
+    NetworkCheckController,
 )
 from fit_configurations.controller.tabs.timestamp.timestamp import (
-    Timestamp as TimestampConfigurationController,
+    TimestampController as TimestampConfigurationController,
 )
 
 from fit_verify_pdf_timestamp.view.verify_pdf_timestamp_ui import (
@@ -76,7 +78,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
         self.ui.close_button.clicked.connect(self.close)
 
         # SET VERSION
-        self.ui.version.setText(get_version())
+        self.ui.version.setText(f"v{get_version()}")
 
         # PDF FILE BUTTON
         self.ui.pdf_file_button.clicked.connect(
@@ -326,7 +328,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
     def __generate_report(self, info_file_path, result):
 
         ntp = get_ntp_date_and_time(
-            NetworkControllerCheck().configuration["ntp_server"]
+            NetworkCheckController().configuration["ntp_server"]
         )
         case_info = CaseFormDialog().get_case_info(self.acquisition_directory)
 

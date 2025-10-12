@@ -17,11 +17,11 @@ from xhtml2pdf import pisa
 from PyPDF2 import PdfMerger
 
 
-from fit_configurations.controller.tabs.general.typesproceedings import (
-    TypesProceedings as TypesProceedingsController,
+from fit_configurations.controller.tabs.general.legal_proceeding_type import (
+    LegalProceedingTypeController as TypesProceedingsController,
 )
 
-from fit_common.core.utils import get_version
+from fit_common.core import get_version
 from fit_configurations.utils import get_language
 from fit_verify_pdf_timestamp.lang import load_translations
 

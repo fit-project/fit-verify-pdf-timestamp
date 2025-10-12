@@ -11,7 +11,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from fit_verify_pdf_timestamp.lang import load_translations
-from fit_common.core.utils import get_version
+from fit_common.core import get_version
 
 
 class Ui_fit_verify_pdf_timestamp(object):
@@ -884,4 +884,4 @@ class Ui_fit_verify_pdf_timestamp(object):
         self.crt_file_input.setPlaceholderText(self.translations["CRT_FILE_INPUT"])
         self.verification_button.setText(self.translations["VERIFICATION_BUTTON"])
         self.credits_label.setText("By: fit-project.org")
-        self.version.setText(get_version())
+        self.version.setText(f"v{get_version()}")
