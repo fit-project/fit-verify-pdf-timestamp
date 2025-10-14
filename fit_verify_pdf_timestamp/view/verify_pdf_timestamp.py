@@ -9,44 +9,40 @@
 
 import hashlib
 import os
+import traceback
 
 import rfc3161ng
-
-from PySide6 import QtCore, QtWidgets
-from PySide6.QtWidgets import QFileDialog
-
-
 from fit_cases.view.case_form_dialog import CaseFormDialog
-from fit_common.gui.utils import (
-    show_finish_verification_dialog,
-    get_verification_label_text,
-    add_label_in_verification_status_list,
-    VerificationTypes,
-    Status,
-)
 from fit_common.core import get_version
-
+from fit_common.core.pdf_report_builder import PdfReportBuilder, ReportType
 from fit_common.core.utils import get_ntp_date_and_time
-
-from fit_verify_pdf_timestamp.controller.verify_pdf_timestamp import (
-    VerifyPDFTimestamp as VerifyPDFTimestampController,
+from fit_common.gui.utils import (
+    Status,
+    VerificationTypes,
+    add_label_in_verification_status_list,
+    get_verification_label_text,
+    show_finish_verification_dialog,
 )
-
 from fit_configurations.controller.tabs.general.general import (
-    GeneralController as GeneralConfigurationController,
+    GeneralController,
+)
+from fit_configurations.controller.tabs.general.legal_proceeding_type import (
+    LegalProceedingTypeController,
 )
 from fit_configurations.controller.tabs.network.network_check import (
     NetworkCheckController,
 )
 from fit_configurations.controller.tabs.timestamp.timestamp import (
-    TimestampController as TimestampConfigurationController,
+    TimestampController,
 )
+from fit_configurations.utils import get_language
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QFileDialog
 
+from fit_verify_pdf_timestamp.lang import load_translations
 from fit_verify_pdf_timestamp.view.verify_pdf_timestamp_ui import (
     Ui_fit_verify_pdf_timestamp,
 )
-
-from fit_verify_pdf_timestamp.lang import load_translations
 
 
 class VerifyPDFTimestamp(QtWidgets.QMainWindow):
@@ -55,7 +51,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
         self.acquisition_directory = None
         self.wizard = wizard
 
-        self.translations = load_translations()
+        self.__translations = load_translations()
 
         self.__init_ui()
 
@@ -124,9 +120,9 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
         if extension == "pdf":
             file, check = QFileDialog.getOpenFileName(
                 None,
-                self.translations["OPEN_PDF_FILE"],
+                self.__translations["OPEN_PDF_FILE"],
                 self.__get_cases_dir(),
-                self.translations["PDF_FILE"],
+                self.__translations["PDF_FILE"],
             )
             if check:
                 self.ui.pdf_file_input.setText(file)
@@ -135,9 +131,9 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
         elif extension == "tsr":
             file, check = QFileDialog.getOpenFileName(
                 None,
-                self.translations["OPEN_TSR_FILE"],
+                self.__translations["OPEN_TSR_FILE"],
                 self.__get_cases_dir(),
-                self.translations["TSR_FILE"],
+                self.__translations["TSR_FILE"],
             )
             if check:
                 self.ui.tsr_file_input.setText(file)
@@ -147,9 +143,9 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
         elif extension == "crt":
             file, check = QFileDialog.getOpenFileName(
                 None,
-                self.translations["OPEN_CRT_FILE"],
+                self.__translations["OPEN_CRT_FILE"],
                 self.__get_cases_dir(),
-                self.translations["CRT_FILE"],
+                self.__translations["CRT_FILE"],
             )
             if check:
                 self.ui.crt_file_input.setText(file)
@@ -162,7 +158,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
         certificate = open(self.ui.crt_file_input.text(), "rb").read()
         pdf_file = self.ui.pdf_file_input.text()
         timestamp = open(self.ui.tsr_file_input.text(), "rb").read()
-        server_name = TimestampConfigurationController().options.get("server_name")
+        server_name = TimestampController().configuration.get("server_name")
 
         verification_status, remote_timestamper = self.__check_remote_timestamper(
             certificate, server_name
@@ -188,18 +184,20 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
                         )
                 else:
                     label = "INFO: {}".format(
-                        self.translations["GENERATE_FILE_TIMESTAMP_INFO_FAIL"]
+                        self.__translations["GENERATE_FILE_TIMESTAMP_INFO_FAIL"]
                     )
                     add_label_in_verification_status_list(
                         self.ui.verification_status_list, label
                     )
             else:
-                label = "INFO: {}".format(self.translations["VERIFY_TIMESTAMP_FAIL"])
+                label = "INFO: {}".format(self.__translations["VERIFY_TIMESTAMP_FAIL"])
                 add_label_in_verification_status_list(
                     self.ui.verification_status_list, label
                 )
         else:
-            label = "INFO: {}".format(self.translations["CHECK_TIMESTAMP_SERVER_FAIL"])
+            label = "INFO: {}".format(
+                self.__translations["CHECK_TIMESTAMP_SERVER_FAIL"]
+            )
             add_label_in_verification_status_list(
                 self.ui.verification_status_list, label
             )
@@ -208,7 +206,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
 
         remote_timestamper = None
         verification_status = Status.SUCCESS
-        verification_name = self.translations["CHECK_TIMESTAMP_SERVER"].format(
+        verification_name = self.__translations["CHECK_TIMESTAMP_SERVER"].format(
             server_name
         )
         verification_message = ""
@@ -232,7 +230,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
     def __verify_timestamp(self, remote_timestamper, timestamp, pdf_file):
         verified = False
         verification_status = Status.SUCCESS
-        verification_name = self.translations["VERIFY_TIMESTAMP"]
+        verification_name = self.__translations["VERIFY_TIMESTAMP"]
         verification_message = ""
 
         try:
@@ -240,7 +238,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
                 timestamp, data=open(pdf_file, "rb").read()
             )
         except Exception as e:
-            verification_status = Status.FAIL
+            verification_status = Status.FAILURE
             verification_message = str(e)
 
         label = get_verification_label_text(
@@ -254,14 +252,14 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
     def __generate_file_timestamp_info(self, data, server_name, timestamp, check):
 
         verification_status = Status.SUCCESS
-        verification_name = self.translations["GENERATE_FILE_TIMESTAMP_INFO"]
+        verification_name = self.__translations["GENERATE_FILE_TIMESTAMP_INFO"]
         verification_message = ""
 
         try:
             if check:
-                verification = self.translations["VALID_TIMESTAMP"]
+                verification = self.__translations["VALID_TIMESTAMP"]
             else:
-                verification = self.translations["INVALID_TIMESTAMP"]
+                verification = self.__translations["INVALID_TIMESTAMP"]
 
             # calculate hash (as in rfc lib)
             hashobj = hashlib.new("sha256")
@@ -278,37 +276,37 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
                 file.write(
                     "======================================================================\n"
                 )
-                file.write(f"{self.translations['REPORT_LABEL_RESULT']}\n")
+                file.write(f"{self.__translations['REPORT_LABEL_RESULT']}\n")
                 file.write(f"{verification}\n")
                 file.write(
                     "======================================================================\n"
                 )
-                file.write(f"{self.translations['REPORT_LABEL_FILENAME']}\n")
+                file.write(f"{self.__translations['REPORT_LABEL_FILENAME']}\n")
                 file.write(f"{os.path.basename(self.ui.pdf_file_input.text())}\n")
                 file.write(
                     "======================================================================\n"
                 )
-                file.write(f"{self.translations['REPORT_LABEL_SIZE']}\n")
+                file.write(f"{self.__translations['REPORT_LABEL_SIZE']}\n")
                 file.write(f"{os.path.getsize(self.ui.pdf_file_input.text())} bytes\n")
                 file.write(
                     "======================================================================\n"
                 )
-                file.write(f"{self.translations['REPORT_LABEL_HASH_ALGORITHM']}\n")
-                file.write(f"{self.translations['REPORT_LABEL_SHA256']}\n")
+                file.write(f"{self.__translations['REPORT_LABEL_HASH_ALGORITHM']}\n")
+                file.write(f"{self.__translations['REPORT_LABEL_SHA256']}\n")
                 file.write(
                     "======================================================================\n"
                 )
-                file.write(f"{self.translations['REPORT_LABEL_DIGEST']}\n")
+                file.write(f"{self.__translations['REPORT_LABEL_DIGEST']}\n")
                 file.write(f"{digest}\n")
                 file.write(
                     "======================================================================\n"
                 )
-                file.write(f"{self.translations['REPORT_LABEL_TIMESTAMP']}\n")
+                file.write(f"{self.__translations['REPORT_LABEL_TIMESTAMP']}\n")
                 file.write(f"{str(timestamp_datetime)}\n")
                 file.write(
                     "======================================================================\n"
                 )
-                file.write(f"{self.translations['REPORT_LABEL_SERVER']}\n")
+                file.write(f"{self.__translations['REPORT_LABEL_SERVER']}\n")
                 file.write(f"{server_name}\n")
                 file.write(
                     "======================================================================\n"
@@ -327,22 +325,42 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
 
     def __generate_report(self, info_file_path, result):
 
-        ntp = get_ntp_date_and_time(
-            NetworkCheckController().configuration["ntp_server"]
-        )
         case_info = CaseFormDialog().get_case_info(self.acquisition_directory)
 
         verification_status = Status.SUCCESS
-        verification_name = self.translations["GENARATE_REPORT"]
+        verification_name = self.__translations["GENARATE_REPORT"]
         verification_message = ""
 
+        language = get_language()
+        translations = (
+            load_translations(lang="it")
+            if language == "Italian"
+            else load_translations()
+        )
+        case_info[
+            "proceeding_type_name"
+        ] = LegalProceedingTypeController().get_proceeding_name_by_id(
+            case_info.get("proceeding_type", 0)
+        )
+
         try:
-            report = VerifyPDFTimestampController(
-                self.acquisition_directory, case_info, ntp
+            report = PdfReportBuilder(
+                ReportType.VERIFY,
+                translations=translations,
+                path=self.acquisition_directory,
+                filename="report_timestamp_verification.pdf",
+                case_info=case_info,
             )
-            report.generate_pdf(result, info_file_path)
+            report.ntp = get_ntp_date_and_time(
+                NetworkCheckController().configuration["ntp_server"]
+            )
+            report.verify_info_file_path = info_file_path
+            report.verify_result = result
+            report.generate_pdf()
+
         except Exception as e:
-            verification_status = Status.FAIL
+            verification_status = Status.FAILURE
+            traceback.print_exc()
             verification_message = str(e)
 
         label = get_verification_label_text(
@@ -356,7 +374,7 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
     def __get_cases_dir(self):
         if self.acquisition_directory is None:
             return os.path.expanduser(
-                GeneralConfigurationController().configuration.get("cases_folder_path")
+                GeneralController().configuration.get("cases_folder_path")
             )
         else:
             return self.acquisition_directory
