@@ -1,14 +1,18 @@
-import locale
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+######
+# -----
+# Copyright (c) 2023 FIT-Project
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# -----
+######
+
 import json
 from pathlib import Path
 
+from fit_common.core import DEFAULT_LANG, get_system_lang
+
 LANG_DIR = Path(__file__).parent
-DEFAULT_LANG = "en"
-
-
-def get_system_lang():
-    lang, _ = locale.getdefaultlocale()
-    return (lang or DEFAULT_LANG).split("_")[0]
 
 
 def load_translations(lang=None):

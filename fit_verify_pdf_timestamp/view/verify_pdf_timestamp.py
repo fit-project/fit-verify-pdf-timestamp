@@ -16,6 +16,7 @@ from fit_cases.view.case_form_dialog import CaseFormDialog
 from fit_common.core import get_version
 from fit_common.core.pdf_report_builder import PdfReportBuilder, ReportType
 from fit_common.core.utils import get_ntp_date_and_time
+from fit_common.gui.ui_translation import translate_ui
 from fit_common.gui.utils import (
     Status,
     VerificationTypes,
@@ -99,6 +100,8 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
         self.input_fields = self.ui.wrapper.findChildren(QtWidgets.QLineEdit)
         for input_field in self.input_fields:
             input_field.textChanged.connect(self.__enable_verify_button)
+
+        translate_ui(self.__translations, self)
 
     def mousePressEvent(self, event):
         self.dragPos = event.globalPosition().toPoint()
