@@ -8,6 +8,8 @@ packages = [
     { include = "fit_verify_pdf_timestamp" }
 ]
 
+exclude = ["fit_verify_pdf_timestamp/ui/**"]
+
 include = [
     "fit_assets/templates/*.html",
     "fit_assets/images/logo-640x640.png"
