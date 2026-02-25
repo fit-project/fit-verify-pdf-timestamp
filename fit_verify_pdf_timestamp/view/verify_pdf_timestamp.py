@@ -118,8 +118,6 @@ class VerifyPDFTimestamp(QtWidgets.QMainWindow):
 
     def __select_file(self, extension):
         # open the correct file picker based on extension
-        open_folder = self.__get_cases_dir()
-
         if extension == "pdf":
             file, check = QFileDialog.getOpenFileName(
                 None,

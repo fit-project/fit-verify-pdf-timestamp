@@ -37,3 +37,16 @@ markers = [
     "integration: integration tests with real external resources and dependencies",
     "e2e: end-to-end UI workflow tests",
 ]
+
+[tool.mypy]
+python_version = "3.11"
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = [
+    "fit_common.*",
+    "fit_cases.*",
+    "fit_configurations.*",
+    "rfc3161ng",
+]
+ignore_missing_imports = true

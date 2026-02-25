@@ -65,7 +65,7 @@ PIPAPI_PYTHON_LOCATION="$(python -c 'import sys; print(sys.executable)')" \
   python -m pip_audit --progress-spinner off
 ```
 
-Note: `pip-audit` may print a skip message for `fit-acquisition`, `fit-assets`, `fit-cases`, `fit-common`, `fit-configurations` and `fit-scraper` because they are a local packages and not published on PyPI.
+Note: `pip-audit` may print a skip message for `fit-assets`, `fit-cases`, `fit-common`, `fit-configurations` and `fit-verify-pdf-timestamp` because they are a local packages and not published on PyPI.
 
 ---
 
