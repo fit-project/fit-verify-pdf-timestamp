@@ -20,9 +20,20 @@ python = ">=3.11,<3.14"
 PySide6 = "6.9.0"
 rfc3161ng = "^2.1.3"
 
-fit-cases = {git = "https://github.com/fit-project/fit-cases.git", rev = "main"}
+fit-cases = {git = "https://github.com/fit-project/fit-cases.git", tag = "v1.0.0-rc1"}
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+pythonpath = ["."]
+markers = [
+    "unit: fast isolated tests",
+    "contract: cross-module contract tests for public interfaces and integrations",
+    "integration: integration tests with real external resources and dependencies",
+    "e2e: end-to-end UI workflow tests",
+]

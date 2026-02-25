@@ -6,43 +6,81 @@ This module provides a graphical interface for verifying the timestamp applied t
 
 ---
 
-## Related FIT components
-
-This module depends on:
-
-- [`fit-cases`](https://github.com/fit-project/fit-cases.git) – Case information
-
 ## Dependencies
 
-Main dependencies are:
+Main dependencies:
 
-- Python `>=3.11,<3.13`
-- [`PySide6`](https://pypi.org/project/PySide6/) 6.9.0
-- `fit-cases` (custom submodule)
+- **Python** >=3.11,<3.14
+- **Poetry** (recommended for development)
+- [PySide6](https://pypi.org/project/PySide6/)  
+- [`fit-cases`](https://github.com/fit-project/fit-cases.git) – Case information
 
-See `pyproject.toml` for full details.
+See `pyproject.toml` for the full list and version details.
 
 ---
 
-## Requirements
-- **Python** 3.11
-- **Poetry** (recommended for development)
+## Local checks (same as CI)
 
-## 🚀 Installation
+Run these commands before opening a PR, so failures are caught locally first.
 
-You can install the module using **Poetry**:
+### What each tool does
+- `pytest`: runs automated tests (`unit`, `contract`, `integration` and `e2e` suites).
+- `ruff`: checks code style and common static issues (lint).
+- `mypy`: performs static type checking on annotated Python code.
+- `bandit`: scans source code for common security anti-patterns.
+- `pip-audit`: checks installed dependencies for known CVEs.
 
+### 1) Base setup
 ```bash
-git clone https://github.com/fit-project/fit-verify-pec.git
-cd fit-verify-pec
-poetry install
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+pip install . pytest ruff mypy "bandit[toml]" pip-audit
+python -m pip install --upgrade "setuptools>=78.1.1"
 ```
 
-To run the verify-pec:
-
+### 2) Test suite
 ```bash
-poetry run python main.py
+export QT_QPA_PLATFORM=offscreen
+
+# unit tests
+pytest -m unit -q tests
+
+# contract tests
+pytest -m contract -q tests
+
+# integration tests
+pytest -m integration -q tests
+
+# end-to-end smoke tests
+pytest -m e2e -q tests
 ```
+
+### 3) Quality and security checks
+```bash
+ruff check fit_verify_pdf_timestamp tests
+mypy fit_verify_pdf_timestamp
+bandit -c pyproject.toml -r fit_verify_pdf_timestamp -q -ll -ii
+PIPAPI_PYTHON_LOCATION="$(python -c 'import sys; print(sys.executable)')" \
+  python -m pip_audit --progress-spinner off
+```
+
+Note: `pip-audit` may print a skip message for `fit-acquisition`, `fit-assets`, `fit-cases`, `fit-common`, `fit-configurations` and `fit-scraper` because they are a local packages and not published on PyPI.
+
+---
+
+## Installation
+
+``` bash
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install --upgrade pip
+    pip install poetry
+    poetry lock
+    poetry install
+    poetry run python main.py
+```
+
 ---
 
 ## Contributing
@@ -50,5 +88,3 @@ poetry run python main.py
 2. Create a new branch (`git checkout -b feat/my-feature`).  
 3. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).  
 4. Submit a Pull Request describing your modification.
-
----
