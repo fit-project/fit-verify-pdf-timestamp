@@ -389,7 +389,7 @@ resolved_reference = "41c79f7cac046356867ed5198d053ac86d053c56"
 
 [[package]]
 name = "fit-cases"
-version = "1.0.0"
+version = "1.0.0rc1"
 description = "Modulo di configurazione per il progetto FIT"
 optional = false
 python-versions = ">=3.11,<3.14"
@@ -398,7 +398,7 @@ files = []
 develop = false
 
 [package.dependencies]
-fit-configurations = {git = "https://github.com/fit-project/fit-configurations.git", tag = "v1.0.0-rc1"}
+fit-configurations = {git = "https://github.com/fit-project/fit-configurations.git", branch = "main"}
 pillow = ">=12.1.1,<13.0.0"
 PySide6 = "6.9.0"
 sqlalchemy = "^2.0.40"
@@ -406,8 +406,8 @@ sqlalchemy = "^2.0.40"
 [package.source]
 type = "git"
 url = "https://github.com/fit-project/fit-cases.git"
-reference = "v1.0.0-rc1"
-resolved_reference = "42557d22ee54bff11ecfd98c419c7e4fb89e809f"
+reference = "main"
+resolved_reference = "38d17907b37ba183fc8e18560c4ae8d3148bbec8"
 
 [[package]]
 name = "fit-common"
@@ -456,8 +456,8 @@ sqlalchemy = "^2.0.40"
 [package.source]
 type = "git"
 url = "https://github.com/fit-project/fit-configurations.git"
-reference = "v1.0.0-rc1"
-resolved_reference = "399087f605ad3d4167c51ccceb2d3d2289e8e0eb"
+reference = "main"
+resolved_reference = "d7eb1e420352cb67dcfc0197c8f0f79696f3c32b"
 
 [[package]]
 name = "freetype-py"
@@ -2053,4 +2053,4 @@ test = ["coverage (>=5.3)", "tomli (>=2.0.1) ; python_version < \"3.11\"", "tox"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "531e17faecb1c09074b82eb11c90c9262a3ceeadb8ea338a95f982ada374e3b0"
+content-hash = "72b9a31c870460ad4f2ca26b16c8dfd21185dcbb9b2e4d73720c5f10ecefd7ce"
