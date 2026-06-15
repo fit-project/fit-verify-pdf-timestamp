@@ -41,9 +41,12 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import QFileDialog
 
 from fit_verify_pdf_timestamp.lang import load_translations
+from fit_verify_pdf_timestamp.rfc3161ng_compat import apply_rfc3161ng_ec_compat
 from fit_verify_pdf_timestamp.view.verify_pdf_timestamp_ui import (
     Ui_fit_verify_pdf_timestamp,
 )
+
+apply_rfc3161ng_ec_compat()
 
 
 class VerifyPDFTimestamp(QtWidgets.QMainWindow):
